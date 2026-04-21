@@ -4,7 +4,7 @@ from flask import Flask, render_template, request
 import mysql.connector
 from dotenv import load_dotenv
 import os
-load_dotenv()
+load_dotenv("mysql.env")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 app = Flask(__name__)
