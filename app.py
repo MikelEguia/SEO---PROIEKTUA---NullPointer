@@ -8,6 +8,13 @@ load_dotenv("mysql.env")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 app = Flask(__name__)
+def get_db_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database="invitados"
+    )
 @app.route('/')
 def index():
     return render_template('index.html')
