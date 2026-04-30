@@ -187,8 +187,8 @@ function indexPertsonalizatu() {
         </tbody>
     </table>
 
-    <p><strong>Taldeburua:</strong> Marco Alonso Fernandez </p>
-    <p><strong>Posta elektronikoa:</strong> marcoalonsofernandez@gmail.com</p>
+    <p><strong>Taldeburua:</strong> Mikel Eguia Bengoa </p>
+    <p><strong>Posta elektronikoa:</strong> meguiabengoa@gmail.com</p>
 
 </body>
 </html>
