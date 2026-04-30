@@ -216,6 +216,8 @@ do
     echo "[10] Nginx instalatu"
     echo "[11] Nginx martxan jarri" 
     echo "[12] Nginx ataka testeatu"
+    echo "[13] Index Ikusi"
+    echo "[14] IndexPersonalizatu"
     echo "[26] Menutik irten"
     read -p "Zein aukera egin nahi duzu? " menuopt
     
@@ -233,6 +235,8 @@ do
         10) nginxInstalatu;;
         11) nginxMatxanJarri;;
         12) nginxatakaTesteatu;;
+        13) indexIkusi;;
+        14) indexPersonalizatu;;
         26) menutikIrten;;
         *) ;;
     esac
