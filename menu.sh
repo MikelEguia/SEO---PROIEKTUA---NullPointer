@@ -200,6 +200,107 @@ EOF"
     firefox http://localhost/index.html &
 }
 
+function gunicornInstalatu(){ #15. aukera
+    if ! python3 -c "import venv" >/dev/null 2>&1; then
+        sudo apt install python3-venv
+    fi
+
+    if [! -d "venv"]; then
+          python3 -m venv venv
+    fi
+  
+    source venv/bin/activate
+    pip install gunicorn 
+}
+
+function gunicornKonfiguratu(){ #16. aukera
+    if [ ! -f "/var/www/hitzorduak/gwsgi.py" ]; then
+    cat <<'EOF' > "/var/www/hitzorduak/gwsgi.py"
+from app import app
+
+if __name__ == "__main__":
+    app.run()
+fi
+EOF
+fi
+cd /var/www/hitzorduak
+gunicorn --bind 127.0.0.1:5555 gwsgi:webapp
+}
+
+function jabetasunaetabaimenakEzarri(){ #17. aukera
+    sudo chmod -R 755 /var/www/hitzorduak
+    sudo chmod 600 /var/www/hitzorduak/.env
+    sudo chmod 600 /var/www/hitzorduak/aplikazioa.py
+
+    sudo chown -R www-data:www-data /var/www/hitzorduak
+}
+
+#function systemdzerbitzuaSortu(){ #18. aukera
+
+#}
+
+function ekoizpenzerbitzarianKopiatu(){ #24. aukera
+    if ! dpkg -l | grep -q openssh-server; then
+        sudo apt update
+        sudo apt install -y openssh-server
+    fi
+    
+    sudo systemctl start ssh
+    echo "==> zerbitzariaren IP-a sartu:"
+    read ip
+
+    scp /var/www/hitzorduak.tar.gz "$USER@$ip:/home/$USER/"
+
+    scp menu.sh "$USER@$ip:/home/$USER/"
+
+    exit 0
+}
+
+function sshkonexiosaiakerakKontrolatu(){ #25. aukera
+    for logfile in /var/log/auth.log /var/log/auth.log.*; do
+        
+        # Si es .gz → usar zcat
+        if [[ "$logfile" == *.gz ]]; then
+            zcat "$logfile" 2>/dev/null | grep "sshd" | grep -E "Failed password|Accepted password" |
+            while read -r line; do
+                pfecha=$(echo "$line" | cut -c1-10)
+
+                usuario=$(echo "$line" | awk -F"for " '{print $2}' | awk '{print $1}')
+
+                if echo "$line" | grep -q "Failed password"; then
+                    estado="[fail]"
+                else
+                    estado="[accept]"
+                fi
+
+                echo "Status: $estado Account name: $usuario Date: $fecha"
+            done
+        else
+            # Si no es .gz → usar cat
+            cat "$logfile" 2>/dev/null | grep "sshd" | grep -E "Failed password|Accepted password" |
+            while read -r line; do
+                fecha=$(echo "$line" | cut -c1-10)
+
+                usuario=$(echo "$line" | awk -F"for " '{print $2}' | awk '{print $1}')
+
+                if echo "$line" | grep -q "Failed password"; then
+                    estado="[fail]"
+                else
+                    estado="[accept]"
+                fi
+
+                echo "Status: $estado Account name: $usuario Date: $fecha"
+            done
+        fi
+    done
+
+}
+
+function menutikIrten(){ #26. aukera
+    cat "Etxahun, Mikel, Jon eta Marco agurtzen zaituzte"
+    exit 0
+}
+
 menuopt=0
 while test $menuopt -ne 26
 do
@@ -216,6 +317,12 @@ do
     echo "[10] Nginx instalatu"
     echo "[11] Nginx martxan jarri" 
     echo "[12] Nginx ataka testeatu"
+    echo "[15] Gunicorn instalatu"
+    echo "[16] Gunicorn configuratu"
+    echo "[17] Gunicorn jabetasuna eta baimenak ezarri"
+    echo "[18] Systemd zerbitzua sortu"
+    echo "[24] Ekoizpen zerbitzarian kopiatu"
+    echo "[25] Ssh konexio saiakerak kontrolatu"
     echo "[26] Menutik irten"
     read -p "Zein aukera egin nahi duzu? " menuopt
     
@@ -233,6 +340,12 @@ do
         10) nginxInstalatu;;
         11) nginxMatxanJarri;;
         12) nginxatakaTesteatu;;
+        15) gunicornInstalatu;;
+        16) gunicornKonfiguratu;;
+        17) jabetasunaetabaimenakEzarri;;
+        18) systemdzerbitzuaSortu;;
+        24) ekoizpenzerbitzarianKopiatu;;
+        25) sshkonexiosaiakerakKontrolatu;;
         26) menutikIrten;;
         *) ;;
     esac
